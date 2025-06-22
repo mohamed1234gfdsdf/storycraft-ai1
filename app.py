@@ -1,43 +1,43 @@
-# 📖 Step 1 - Simple Draft to Scenes
 import streamlit as st
 import google.generativeai as genai
 
-# إعداد مفتاح Gemini
-GOOGLE_API_KEY = "ضع هنا مفتاح Gemini بتاعك"
-genai.configure(api_key=GOOGLE_API_KEY)
-model = genai.GenerativeModel("gemini-pro")
+# إعداد Google Gemini
+genai.configure(api_key="AIzaSyDiDuO9UDhPsA3UDQ7ZXoDfcovKE_Nmyog")
+text_model = genai.GenerativeModel("gemini-pro")
 
-# واجهة المستخدم
+# واجهة التطبيق
+st.set_page_config(page_title="📖 StoryCraft - Simple Scene Builder", layout="centered")
 st.title("📖 StoryCraft - Simple Scene Builder")
-story_draft = st.text_area("✍️ أكتب ملخص القصة هنا (درافت بسيط):", height=200)
-num_scenes = st.number_input("📸 عدد المشاهد المطلوبة:", min_value=1, max_value=20, value=5, step=1)
 
-if st.button("✅ حلل القصة وطلّع المشاهد"):
+# إدخال القصة وعدد المشاهد
+st.markdown("### ✍️ اكتب ملخص القصة هنا (درافت بسيط):")
+story_draft = st.text_area("مثال: قطة وولدها اصطادوا قرش", height=200)
+
+num_scenes = st.number_input("📸 عدد المشاهد المطلوبة:", min_value=1, max_value=20, value=7)
+
+if st.button("💡 حلل القصة واطلع المشاهد"):
     if not story_draft.strip():
-        st.warning("⚠️ اكتب ملخص القصة الأول.")
+        st.warning("رجاءً اكتب ملخص القصة.")
     else:
-        with st.spinner("🔍 بيحلل القصة..."):
+        with st.spinner("⏳ بيحلل القصة..."):
             prompt = f"""
-You are an expert children's story scene planner.
+قسم القصة التالية إلى {num_scenes} مشهد تصويري مميز. 
+كل مشهد يجب أن يحتوي على:
+1. عنوان بسيط للمشهد
+2. وصف بصري دقيق جدًا كأنك بتحضّر لصورة
+3. اذكر إذا كانت القطة أو ابنها ظاهرين، وماذا يفعلون
 
-Based on the following draft:
-"{story_draft}"
-
-Please generate exactly {num_scenes} separate visual scenes. 
-For each scene, return only:
-1. Scene title
-2. What we see visually
-3. The action of the main characters (especially cats if any)
-
-Output each scene clearly numbered. Write in English only.
+القصة:
+{story_draft}
 """
             try:
-                response = model.generate_content(prompt)
+                response = text_model.generate_content(prompt)
                 scenes = response.text.strip().split("\n\n")
-                st.success("🎉 المشاهد اتحللت بنجاح!")
 
-                for idx, scene in enumerate(scenes, start=1):
-                    st.markdown(f"### 🎬 Scene {idx}")
+                st.success("✅ تم استخراج المشاهد:")
+                for idx, scene in enumerate(scenes):
+                    st.markdown(f"#### 🎬 مشهد {idx+1}")
                     st.markdown(scene)
+
             except Exception as e:
-                st.error(f"❌ حصل خطأ أثناء التوليد: {e}")
+                st.error(f"❌ حصل خطأ أثناء التحليل: {e}")
