@@ -1,39 +1,39 @@
-# StoryCraft AI - Build Full Story Scenes with Gemini
+# StoryCraft AI - Full Smart Generator with Trendy Cats 🐾
+
 import streamlit as st
 import os
 import tempfile
 import zipfile
+import base64
 from PIL import Image
 from io import BytesIO
 from moviepy.editor import ImageSequenceClip
 import google.generativeai as genai
 
-# ========== Google Gemini API Setup ==========
-genai.configure(api_key="AIzaSyD__P7mHG3kYbVWfF3XRHZB--8FUSDOFUw")
-text_model = genai.GenerativeModel(model_name="gemini-1.5-pro")
-image_model = genai.GenerativeModel(model_name="models/image")
+# ========== Google Gemini Setup ==========
+GOOGLE_API_KEY = "AIzaSyD__P7mHG3kYbVWfF3XRHZB--8FUSDOFUw"
+genai.configure(api_key=GOOGLE_API_KEY)
+image_model = genai.GenerativeModel("models/image")
+text_model = genai.GenerativeModel("gemini-pro")
 
-# ========== Streamlit UI Setup ==========
+# ========== UI Setup ==========
 st.set_page_config(layout="wide")
 st.title("📖 StoryCraft AI - Full Auto Story to Images/Video")
 
-st.markdown("### ✍️ Write your story draft")
-story_draft = st.text_area("Just describe your story in a few lines (example: a cat and her kitten fishing and they catch a shark)", height=300)
+# ========== Inputs ==========
+st.markdown("### ✍️ Write your full story draft")
+story_draft = st.text_area("Write your story draft (free text):", height=400)
 
 image_ratio = st.selectbox("Choose image ratio:", ["9:16", "16:9", "1:1"])
 
+use_gemini = st.checkbox("Use Gemini for generation", value=True)
+use_huggingface = st.checkbox("Use HuggingFace for video generation", value=False)
+
 # ========== Auto Scene Breakdown ==========
 def get_scenes_from_draft(text):
-    prompt = f"""You're helping create visual scenes for a children's animated video.
-Break down this draft story into a list of scenes (no more than 10). For each scene, return:
-1. 🎬 Scene Title
-2. 📸 Visual Description (what should appear in the image - include cat characters and key objects/actions)
-
-Story draft:
-{text}
-"""
+    prompt = f"Break down the following children's story into distinct illustrated scenes. For each scene, provide:\n1. Title\n2. Visual description\n3. Mention if cats appear and their action.\nText:\n{text}"
     response = text_model.generate_content(prompt)
-    scenes = response.text.strip().split("\n\n")
+    scenes = response.text.strip().split("Scene")
     return [s.strip() for s in scenes if s.strip()]
 
 # ========== Image Generation ==========
@@ -47,18 +47,18 @@ def generate_image(prompt):
         st.error(f"Image generation failed: {e}")
         return None
 
-# ========== Main Scene Generation ==========
-if st.button("🚀 Generate All Scenes"):
+# ========== Generate Scenes ==========
+if st.button("🚀 Analyze Story & Generate All Scenes"):
     if not story_draft:
-        st.warning("Please enter a story draft first.")
+        st.warning("Please enter a draft story first.")
     else:
         scenes = get_scenes_from_draft(story_draft)
         st.session_state["scenes"] = scenes
         st.session_state["images"] = []
 
         for idx, scene in enumerate(scenes):
-            st.markdown(f"#### 🎬 Scene {idx+1}")
-            st.text_area(f"Scene Description {idx+1}", value=scene, key=f"scene_{idx}")
+            st.markdown(f"#### 🎨 Scene {idx+1}")
+            st.text_area(f"📝 Scene Description {idx+1}", value=scene, key=f"scene_{idx}")
             with st.spinner("Generating image..."):
                 img = generate_image(scene)
                 if img:
@@ -67,7 +67,7 @@ if st.button("🚀 Generate All Scenes"):
                 else:
                     st.warning(f"No image generated for scene {idx+1}.")
 
-# ========== Download Prompts + Images ==========
+# ========== Downloads ==========
 if st.button("⬇️ Download Prompts + Images"):
     with tempfile.TemporaryDirectory() as tmpdir:
         prompt_path = os.path.join(tmpdir, "prompts.txt")
@@ -89,6 +89,22 @@ if st.button("⬇️ Download Prompts + Images"):
             st.download_button("📦 Download Story ZIP", f, file_name="story.zip")
 
 # ========== Compile to Video ==========
-if st.button("🎞️ Compile Story into Video"):
-    if "images" in st.session_state and st.session_state["images"]:
-        with tempfile
+if st.button("🎮 Compile Story into Video"):
+    if "images" in st.session_state and st.session_state.images:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            image_paths = []
+            for idx, img in enumerate(st.session_state.images):
+                path = os.path.join(tmpdir, f"scene_{idx+1}.jpg")
+                img.save(path)
+                image_paths.append(path)
+
+            clip = ImageSequenceClip(image_paths, fps=1)
+            video_path = os.path.join(tmpdir, "story_video.mp4")
+            clip.write_videofile(video_path, codec="libx264", audio=False)
+
+            st.success("✅ Video Compiled!")
+            st.video(video_path)
+            with open(video_path, "rb") as f:
+                st.download_button("⬇️ Download Final Video", f, file_name="final_story.mp4")
+    else:
+        st.warning("No images found.")
