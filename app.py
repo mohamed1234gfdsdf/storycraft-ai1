@@ -72,8 +72,7 @@ if st.button("⬇️ Download All Prompts + Images"):
         prompt_path = os.path.join(tmpdir, "prompts.txt")
         with open(prompt_path, "w", encoding="utf-8") as f:
             for idx, scene in enumerate(st.session_state.get("scenes", [])):
-                f.write(f"Scene {idx+1}:
-{scene}\n\n")
+                f.write(f"Scene {idx+1}: {scene}\n\n")
 
         for idx, img in enumerate(st.session_state.get("images", [])):
             img_path = os.path.join(tmpdir, f"scene_{idx+1}.jpg")
