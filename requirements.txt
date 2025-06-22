@@ -1,5 +1,5 @@
 streamlit
+openai
+requests
+python-dotenv
 Pillow
-google-generativeai
-moviepy==1.0.3
-
