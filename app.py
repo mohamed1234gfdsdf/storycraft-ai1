@@ -98,7 +98,7 @@ function App() {
         description += `medium-sized `;
       }
       description += `${char.color} ${char.type} cat with soft realistic fur, `;
-      // Explicitly state "cat" nature for Mama Cat's posture to avoid human-like appearance
+# Explicitly state "cat" nature for Mama Cat's posture to avoid human-like appearance
       if (char.name === 'Mama Cat') {
         description += `wide amber eyes, a small pink nose, clean whiskers. She wears a beige kitchen apron tied at the back. Always standing upright on her hind legs with a confident, CAT-LIKE posture, not human-like.`;
       } else if (char.name === 'Little Kitten') {
