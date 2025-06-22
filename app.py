@@ -3,7 +3,7 @@ import google.generativeai as genai
 
 # إعداد Google Gemini
 genai.configure(api_key="AIzaSyDiDuO9UDhPsA3UDQ7ZXoDfcovKE_Nmyog")
-text_model = genai.GenerativeModel("gemini-pro")
+text_model = genai.GenerativeModel("models/gemini-1.5-pro-latest")
 
 # واجهة التطبيق
 st.set_page_config(page_title="📖 StoryCraft - Simple Scene Builder", layout="centered")
